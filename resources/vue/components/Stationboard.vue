@@ -4,15 +4,18 @@ import ProductIcon from "./ProductIcon.vue";
 import LineIndicator from "./LineIndicator.vue";
 import {DateTime} from "luxon";
 import CheckinLineRun from "./CheckinLineRun.vue";
-import CheckinInterface from "./CheckinInterface.vue";
-import StationAutocomplete from "./StationAutocomplete.vue";
+import CheckinInterface from "./Checkin/CheckinInterface.vue";
+import StationAutocomplete from "./StationAutocomplete/StationAutocomplete.vue";
 import {trans} from "laravel-vue-i18n";
 import StationBoardEntry from "./Checkin/StationBoardEntry.vue";
+import Spinner from "./Spinner.vue";
 
 export default {
     components: {
+        Spinner,
         StationBoardEntry,
-        StationAutocomplete, CheckinInterface, CheckinLineRun, LineIndicator, ProductIcon, FullScreenModal},
+        StationAutocomplete, CheckinInterface, CheckinLineRun, LineIndicator, ProductIcon, FullScreenModal
+    },
     data() {
         return {
             data: [],
@@ -25,10 +28,10 @@ export default {
             loading: false,
             stationName: null,
             trwlStationId: null,
-            nextFetched: 0,
             firstFetchTime: null,
             pushState: null,
             fastCheckinIbnr: null,
+            useInternalIdentifiers: false,
         };
     },
     methods: {
@@ -104,19 +107,10 @@ export default {
                             } else {
                                 this.data = result.data.concat(this.data);
                             }
-                            this.meta = result.meta;
+                            this.meta        = result.meta;
                             this.stationName = result.meta.station.name;
 
-                            if (this.nextFetched === 0) {
-                                this.firstFetchTime = DateTime.fromISO(this.meta?.times?.now);
-                            }
-
-                            if (this.data.length === 0 && this.nextFetched < 3) {
-                                this.nextFetched++;
-                                this.fetchNext();
-                            } else {
-                                this.nextFetched = 0;
-                            }
+                            this.firstFetchTime = DateTime.fromISO(this.meta?.times?.now);
                         });
                     }
                 });
@@ -128,7 +122,7 @@ export default {
             return DateTime.fromISO(item.when) < DateTime.now();
         },
         async analyzeUrlParams() {
-            let urlParams = new URLSearchParams(window.location.search);
+            let urlParams  = new URLSearchParams(window.location.search);
             this.fetchTime = DateTime.now().setZone("UTC");
 
             if (urlParams.has('tripId')) {
@@ -148,6 +142,10 @@ export default {
                 if (urlParams.has('destination')) {
                     this.fastCheckinIbnr = urlParams.get('destination');
                 }
+                if (urlParams.has('idType')) {
+                    //ToDo change this form to use trwl-id per default and use db-ibnr for hafas-related-input
+                    this.useInternalIdentifiers = urlParams.get('idType') === 'trwl';
+                }
                 this.show = true;
                 this.$refs?.modal?.show();
                 return new Promise((resolve) => {
@@ -159,11 +157,12 @@ export default {
                 window.notyf.error("No station found!");
             }
             if (urlParams.has('when')) {
-                this.fetchTime = DateTime.fromISO(urlParams.get('when')).setZone("UTC");
+                const fetchTime = DateTime.fromISO(urlParams.get('when')).setZone("UTC");
+                this.fetchTime  = fetchTime.isValid ? fetchTime : this.fetchTime;
             }
-            this.stationName = urlParams.get('stationName');
+            this.stationName   = urlParams.get('stationName');
             this.trwlStationId = urlParams.get('stationId');
-            this.show = false;
+            this.show          = false;
             this.$refs.modal.hide();
             return new Promise((resolve) => {
                 resolve();
@@ -185,7 +184,7 @@ export default {
         },
         goBackToLineRun() {
             this.selectedDestination = null;
-            this.fastCheckinIbnr = null;
+            this.fastCheckinIbnr     = null;
         }
     },
     mounted() {
@@ -204,8 +203,9 @@ export default {
             if (value === null) {
                 window.history.back();
             } else {
-                const params = new URLSearchParams(window.location.search);
-                params.append('destination', value.evaIdentifier)
+                const params      = new URLSearchParams(window.location.search);
+                const destination = this.useInternalIdentifiers ? value.id : value.evaIdentifier;
+                params.set('destination', destination)
                 this.pushHistory(params);
             }
         }
@@ -236,10 +236,8 @@ export default {
         :time="now"
         :show-filter-button="true"
     />
-    <div v-if="loading" style="max-width: 200px;" class="spinner-grow text-trwl mx-auto p-2" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-    <FullScreenModal ref="modal">
+    <Spinner v-if="loading"/>
+    <FullScreenModal ref="modal" :body-class="{'p-0': showCheckinInterface}">
         <template #header v-if="selectedTrain">
             <div class="col-1 align-items-center d-flex">
                 <ProductIcon :product="selectedTrain.line.product"/>
@@ -260,7 +258,8 @@ export default {
         <template #body v-if="showLineRun">
             <CheckinLineRun
                 :selectedTrain="selectedTrain"
-                :fastCheckinIbnr="fastCheckinIbnr"
+                :fastCheckinId="fastCheckinIbnr"
+                :useInternalIdentifiers="useInternalIdentifiers"
                 v-model:destination="selectedDestination"
             />
         </template>
@@ -268,7 +267,11 @@ export default {
             <button type="button" class="btn-close" aria-label="Back" @click="goBackToLineRun"></button>
         </template>
         <template #body v-if="showCheckinInterface">
-            <CheckinInterface :selectedTrain="selectedTrain" :selectedDestination="selectedDestination"/>
+            <CheckinInterface
+                :selectedTrain="selectedTrain"
+                :selectedDestination="selectedDestination"
+                :useInternalIdentifiers="useInternalIdentifiers"
+            />
         </template>
     </FullScreenModal>
 
@@ -279,7 +282,9 @@ export default {
         <div class="card mb-1 dep-card mt-3 mb-3">
             <div class="text-center my-auto">
                 {{ trans("stationboard.no-departures") }}
-                ({{ formatTime(this.firstFetchTime) }} - {{ formatTime(this.meta?.times?.now) }})
+                <span v-if="firstFetchTime">
+                    ({{ formatTime(this.firstFetchTime) }} - {{ formatTime(this.meta?.times?.now) }})
+                </span>
             </div>
         </div>
     </template>
