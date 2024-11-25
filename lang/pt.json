@@ -44,5 +44,9 @@
     "user.email.new": "Novo endereço eletrónico",
     "user.fresh-link": "Uma nova ligação de verificação foi enviada para o teu endereço eletrónico.",
     "user.login.or": "ou",
-    "user.not-received-before": "Se não recebeste a mensagem eletrónica, "
+    "user.not-received-before": "Se não recebeste a mensagem eletrónica, ",
+    "user.invalid-mastodon": ":domain não parece ser uma instância de Mastodon.",
+    "user.no-user": "Nenhum utilizador encontrado.",
+    "controller.transport.no-name-given": "Precisas de dar o nome de uma estação!",
+    "controller.transport.social-post": "Estou em :lineName com destino a :Destination! #NowTräwelling |Estou em :lineName com destino a :Destination! #NowTräwelling "
 }
