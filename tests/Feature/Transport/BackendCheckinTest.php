@@ -2,13 +2,14 @@
 
 namespace Tests\Feature\Transport;
 
+use App\DataProviders\DataProviderBuilder;
+use App\DataProviders\DataProviderInterface;
 use App\Enum\TravelType;
 use App\Exceptions\CheckInCollisionException;
 use App\Exceptions\HafasException;
 use App\Exceptions\StationNotOnTripException;
 use App\Http\Controllers\Backend\Transport\TrainCheckinController;
-use App\Http\Controllers\HafasController;
-use App\Http\Controllers\TransportController;
+use App\Http\Controllers\Frontend\Admin\CheckinController;
 use App\Models\Stopover;
 use App\Models\User;
 use App\Repositories\CheckinHydratorRepository;
@@ -17,9 +18,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\FeatureTestCase;
 use Tests\Helpers\CheckinRequestTestHydrator;
+use Tests\TestHelpers\HafasHelpers;
 
 class BackendCheckinTest extends FeatureTestCase
 {
+    private DataProviderInterface $dataProvider;
+
+    public function setUp(): void {
+        parent::setUp();
+        $this->dataProvider = (new DataProviderBuilder())->build();
+    }
 
     use RefreshDatabase;
 
@@ -32,8 +40,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user            = User::factory()->create();
-        $stationHannover = HafasController::getStation(8000152);
-        $departures      = HafasController::getDepartures(
+        $stationHannover = HafasHelpers::getStationById(8000152);
+        $departures      = $this->dataProvider->getDepartures(
             station: $stationHannover,
             when:    Carbon::parse('2023-01-12 08:00'),
             type:    TravelType::EXPRESS,
@@ -49,7 +57,7 @@ class BackendCheckinTest extends FeatureTestCase
         $this->expectException(StationNotOnTripException::class);
 
         $dto = (new CheckinRequestTestHydrator($user))->hydrateFromStopovers($trip, $originStopover, null);
-        $dto->setDestination(HafasController::getStation(8000001))
+        $dto->setDestination(HafasHelpers::getStationById(8000001))
             ->setArrival($originStopover->departure_planned);
         TrainCheckinController::checkin($dto);
     }
@@ -63,8 +71,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user       = User::factory()->create();
-        $station    = HafasController::getStation(8000105);
-        $departures = HafasController::getDepartures(
+        $station    = HafasHelpers::getStationById(8000105);
+        $departures = $this->dataProvider->getDepartures(
             station: $station,
             when:    Carbon::parse('2023-01-12 08:00'),
             type:    TravelType::EXPRESS,
@@ -97,8 +105,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user       = User::factory()->create();
-        $station    = HafasController::getStation(8000105);
-        $departures = HafasController::getDepartures(
+        $station    = HafasHelpers::getStationById(8000105);
+        $departures = $this->dataProvider->getDepartures(
             station: $station,
             when:    Carbon::parse('2023-01-12 08:00'),
             type:    TravelType::EXPRESS,
@@ -139,7 +147,7 @@ class BackendCheckinTest extends FeatureTestCase
         // First: Get a train that's fine for our stuff
         $timestamp = Carbon::parse("2023-01-15 10:15");
         try {
-            $trainStationboard = TransportController::getDepartures(
+            $trainStationboard = CheckinController::getDeprecatedDepartures(
                 stationQuery: 'Schloss Cecilienhof, Potsdam',
                 when:         $timestamp,
                 travelType:   TravelType::BUS
@@ -205,8 +213,8 @@ class BackendCheckinTest extends FeatureTestCase
 
         // First: Get a train that's fine for our stuff
         // The 10:00 train actually quits at Südkreuz, but the 10:05 does not.
-        $station    = HafasController::getStation(8089110);
-        $departures = HafasController::getDepartures(
+        $station    = HafasHelpers::getStationById(8089110);
+        $departures = $this->dataProvider->getDepartures(
             station: $station,
             when:    Carbon::parse('2023-01-16 10:00'),
         );
@@ -258,8 +266,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user                    = User::factory()->create();
-        $stationPlantagenPotsdam = HafasController::getStation(736165);
-        $departures              = HafasController::getDepartures(
+        $stationPlantagenPotsdam = HafasHelpers::getStationById(736165);
+        $departures              = $this->dataProvider->getDepartures(
             station: $stationPlantagenPotsdam,
             when:    Carbon::parse('2023-01-16 10:00'),
             type:    TravelType::TRAM,
@@ -312,8 +320,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user                    = User::factory()->create();
-        $stationPlantagenPotsdam = HafasController::getStation(736165);
-        $departures              = HafasController::getDepartures(
+        $stationPlantagenPotsdam = HafasHelpers::getStationById(736165);
+        $departures              = $this->dataProvider->getDepartures(
             station: $stationPlantagenPotsdam,
             when:    Carbon::parse('2023-01-16 10:00'),
         );
@@ -365,8 +373,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user       = User::factory()->create();
-        $station    = HafasController::getStation(102932); // Flughafen Terminal 1, Frankfurt a.M.
-        $departures = HafasController::getDepartures(
+        $station    = HafasHelpers::getStationById(102932); // Flughafen Terminal 1, Frankfurt a.M.
+        $departures = $this->dataProvider->getDepartures(
             station: $station,
             when:    Carbon::parse('2023-01-16 10:00'),
             type:    TravelType::BUS,
@@ -406,8 +414,8 @@ class BackendCheckinTest extends FeatureTestCase
                    ]);
 
         $user       = User::factory()->create();
-        $station    = HafasController::getStation(self::FRANKFURT_HBF['id']);
-        $departures = HafasController::getDepartures(
+        $station    = HafasHelpers::getStationById(self::FRANKFURT_HBF['id']);
+        $departures = $this->dataProvider->getDepartures(
             station: $station,
             when:    Carbon::parse('2023-01-16 08:00'),
             type:    TravelType::EXPRESS,

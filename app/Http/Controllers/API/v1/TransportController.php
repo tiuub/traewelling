@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\v1;
 
+use App\DataProviders\Hafas;
 use App\Dto\Transport\Station as StationDto;
 use App\Enum\Business;
 use App\Enum\StatusVisibility;
@@ -12,7 +13,6 @@ use App\Exceptions\HafasException;
 use App\Exceptions\StationNotOnTripException;
 use App\Http\Controllers\Backend\Transport\StationController;
 use App\Http\Controllers\Backend\Transport\TrainCheckinController;
-use App\Http\Controllers\HafasController;
 use App\Http\Controllers\TransportController as TransportBackend;
 use App\Http\Resources\CheckinSuccessResource;
 use App\Http\Resources\StationResource;
@@ -153,7 +153,7 @@ class TransportController extends Controller
         $station   = Station::findOrFail($stationId);
 
         try {
-            $departures = HafasController::getDepartures(
+            $departures = $this->dataProvider->getDepartures(
                 station:   $station,
                 when:      $timestamp,
                 type:      TravelType::tryFrom($validated['travelType'] ?? null),
@@ -311,7 +311,7 @@ class TransportController extends Controller
                                         ]);
 
         try {
-            $nearestStation = HafasController::getNearbyStations(
+            $nearestStation = $this->dataProvider->getNearbyStations(
                 latitude:  $validated['latitude'],
                 longitude: $validated['longitude'],
                 results:   1
@@ -513,7 +513,7 @@ class TransportController extends Controller
      */
     public function getTrainStationAutocomplete(string $query): JsonResponse {
         try {
-            $trainAutocompleteResponse = TransportBackend::getTrainStationAutocomplete($query);
+            $trainAutocompleteResponse = (new TransportBackend(Hafas::class))->getTrainStationAutocomplete($query);
             return $this->sendResponse($trainAutocompleteResponse);
         } catch (HafasException) {
             return $this->sendError("There has been an error with our data provider", 503);

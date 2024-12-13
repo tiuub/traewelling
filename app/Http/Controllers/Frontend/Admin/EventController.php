@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Frontend\Admin;
 
+use App\DataProviders\DataProviderBuilder;
+use App\DataProviders\DataProviderInterface;
+use App\DataProviders\Hafas;
 use App\Enum\EventRejectionReason;
 use App\Exceptions\HafasException;
 use App\Http\Controllers\Backend\Admin\EventController as AdminEventBackend;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\HafasController;
 use App\Models\Event;
 use App\Models\EventSuggestion;
 use App\Notifications\EventSuggestionProcessed;
@@ -20,6 +22,12 @@ use Illuminate\View\View;
 
 class EventController extends Controller
 {
+    private DataProviderInterface $dataProvider;
+
+    public function __construct(string $dataProvider = null) {
+        $dataProvider       ??= Hafas::class;
+        $this->dataProvider = (new DataProviderBuilder())->build($dataProvider);
+    }
 
     private const VALIDATOR_RULES = [
         'name'                 => ['required', 'max:255'],
@@ -147,7 +155,7 @@ class EventController extends Controller
         }
 
         if (isset($validated['nearest_station_name'])) {
-            $station = HafasController::getStations($validated['nearest_station_name'], 1)->first();
+            $station = $this->dataProvider->getStations($validated['nearest_station_name'], 1)->first();
 
             if ($station === null) {
                 return back()->with('alert-danger', 'Die Station konnte nicht gefunden werden.');
@@ -187,7 +195,7 @@ class EventController extends Controller
 
         $station = null;
         if (isset($validated['nearest_station_name'])) {
-            $station = HafasController::getStations($validated['nearest_station_name'], 1)->first();
+            $station = $this->dataProvider->getStations($validated['nearest_station_name'], 1)->first();
 
             if ($station === null) {
                 return back()->with('alert-danger', 'Die Station konnte nicht gefunden werden.');
@@ -219,7 +227,7 @@ class EventController extends Controller
         if (strlen($validated['nearest_station_name'] ?? '') === 0) {
             $validated['station_id'] = null;
         } elseif ($validated['nearest_station_name'] && $validated['nearest_station_name'] !== $event->station->name) {
-            $station = HafasController::getStations($validated['nearest_station_name'], 1)->first();
+            $station = $this->dataProvider->getStations($validated['nearest_station_name'], 1)->first();
 
             if ($station === null) {
                 return back()->with('alert-danger', 'Die Station konnte nicht gefunden werden.');
