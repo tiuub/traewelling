@@ -1,1 +1,17 @@
-{}
+{
+    "user.email-verify": "Gwirio'r eich cyfeiriad e-bost",
+    "user.forgot-password": "Anghofio eich cyfrinair?",
+    "user.header-reset-pw": "Ailosod y cyfrinair",
+    "user.login": "Mewngofnodi",
+    "user.login.or": "neu",
+    "user.email": "Cyfeiriad E-bost",
+    "user.email.change": "Colygu'r cyfeiriad e-bost",
+    "user.login-credentials": "Cyfeiriad E-bost neu enw arddangos",
+    "user.no-account": "Dim cyfrif?",
+    "user.password": "Cyfrinair",
+    "user.register": "Creu cyfrif",
+    "user.remember-me": "Cofiwch fi",
+    "user.login.mastodon": "Mewngofnodi efo mastodon",
+    "user.displayname": "Enw arddangos",
+    "user.email.new": "Cyfeiriad E-Bost newydd"
+}
