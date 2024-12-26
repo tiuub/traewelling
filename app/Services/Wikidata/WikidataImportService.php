@@ -2,6 +2,7 @@
 
 namespace App\Services\Wikidata;
 
+use App\Dto\Coordinate;
 use App\Dto\Wikidata\WikidataEntity;
 use App\Exceptions\Wikidata\FetchException;
 use App\Models\Station;
@@ -11,8 +12,25 @@ use Illuminate\Support\Facades\Log;
 class WikidataImportService
 {
 
+    // supported types global definieren
+    private const SUPPORTED_TYPES = [
+        'Q55490', // Durchgangsbahnhof
+        'Q18543139', // Hauptbahnhof
+        'Q27996466', // Bahnhof (betrieblich)
+        'Q55488', // Bahnhof (Verkehrsanlage einer Bahn)
+        'Q124817561', // Betriebsstelle
+        'Q644371', // internationaler Flughafen
+        'Q21836433', // Flughafen
+        'Q953806', // Bushaltestelle
+        'Q2175765', // Straßenbahnhaltestelle
+    ];
+
     public static function importStation(string $qId): Station {
         $wikidataEntity = WikidataEntity::fetch($qId);
+
+        if (!self::isTypeSupported($wikidataEntity)) {
+            throw new \InvalidArgumentException('Entity ' . $qId . ' is not a supported type');
+        }
 
         $name = $wikidataEntity->getClaims('P1448')[0]['mainsnak']['datavalue']['value']['text'] //P1448 = official name
                 ?? $wikidataEntity->getLabel('de') //german label
@@ -22,16 +40,14 @@ class WikidataImportService
             throw new \InvalidArgumentException('No name found for entity ' . $qId);
         }
 
-        $coordinates = $wikidataEntity->getClaims('P625')[0]['mainsnak']['datavalue']['value'] ?? null; //P625 = coordinate location
+        $coordinates = self::getCoordinates($wikidataEntity);
         if ($coordinates === null) {
             throw new \InvalidArgumentException('No coordinates found for entity ' . $qId);
         }
 
-        $latitude  = $coordinates['latitude'];
-        $longitude = $coordinates['longitude'];
-        $ibnr      = $wikidataEntity->getClaims('P954')[0]['mainsnak']['datavalue']['value'] ?? null;    //P954 = IBNR
-        $rl100     = $wikidataEntity->getClaims('P8671')[0]['mainsnak']['datavalue']['value'] ?? null;   //P8671 = RL100
-        $ifopt     = $wikidataEntity->getClaims('P12393')[0]['mainsnak']['datavalue']['value'] ?? null;  //P12393 = IFOPT
+        $ibnr  = $wikidataEntity->getClaims('P954')[0]['mainsnak']['datavalue']['value'] ?? null;    //P954 = IBNR
+        $rl100 = $wikidataEntity->getClaims('P8671')[0]['mainsnak']['datavalue']['value'] ?? null;   //P8671 = RL100
+        $ifopt = $wikidataEntity->getClaims('P12393')[0]['mainsnak']['datavalue']['value'] ?? null;  //P12393 = IFOPT
         if ($ifopt !== null) {
             $splittedIfopt = explode(':', $ifopt);
         }
@@ -44,8 +60,8 @@ class WikidataImportService
         return Station::create(
             [
                 'name'          => $name,
-                'latitude'      => $latitude,
-                'longitude'     => $longitude,
+                'latitude'      => $coordinates->latitude,
+                'longitude'     => $coordinates->longitude,
                 'wikidata_id'   => $qId,
                 'rilIdentifier' => $rl100,
                 'ibnr'          => $ibnr,
@@ -112,6 +128,25 @@ class WikidataImportService
                                             'name' => $text
                                         ]);
         }
+    }
+
+    public static function isTypeSupported(WikidataEntity $entity): bool {
+        $instancesOf = $entity->getClaims('P31');
+        foreach ($instancesOf as $instanceOf) {
+            $instanceOfId = $instanceOf['mainsnak']['datavalue']['value']['id'];
+            if (in_array($instanceOfId, self::SUPPORTED_TYPES)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function getCoordinates(WikidataEntity $entity): ?Coordinate {
+        $coordinates = $entity->getClaims('P625')[0]['mainsnak']['datavalue']['value'] ?? null; //P625 = coordinate location
+        if ($coordinates === null) {
+            return null;
+        }
+        return new Coordinate($coordinates['latitude'], $coordinates['longitude']);
     }
 
 }
