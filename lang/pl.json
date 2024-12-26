@@ -259,7 +259,7 @@
     "controller.status.like-not-found": "Nie znaleziono polubienia.",
     "about.feature-missing": "Jeśli chcesz zasugerować nam nową funkcję lub znalazłeś błąd, zgłoś to bezpośrednio na naszym <a href=\"https://github.com/Traewelling/traewelling/issues/new/choose\" target=\"_blank\">repozytorium GitHub</a>.",
     "controller.transport.checkin-ok": "Pomyślnie zameldowano w :lineName!|Pomyślnie zameldowano w linii :lineName!",
-    "controller.transport.also-in-connection": "Również w tym związku jest:|W tym związku są również:",
+    "controller.transport.also-in-connection": "Również w tym połączeniu jest:|W tym połączeniu są również:",
     "controller.transport.social-post": "Jadę :lineName do :Destination! #NowTräwelling |Jadę linią :lineName do :Destination! #NowTräwelling ",
     "controller.user.follow-error": "Nie możesz obserwować tej osoby.",
     "controller.transport.social-post-with-event": "Jadę :lineName do #:hashtag przez :Destination! #NowTräwelling | Jadę linią :lineName do #:hashtag przez :Destination! #NowTräwelling ",
@@ -626,5 +626,15 @@
     "no-points-message.manual": "Nie otrzymałeś punktów, ponieważ ta podróż została dodana ręcznie.",
     "no-points-warning": "Nie otrzymasz za to pełnej liczby punktów.",
     "maintenance.title": "Obecnie pracujemy nad usprawnieniem naszej strony internetowej.",
-    "events.show-all-for-event": "Pokaż wszystkie meldunki dla tego wydarzenia"
+    "events.show-all-for-event": "Pokaż wszystkie meldunki dla tego wydarzenia",
+    "scopes.write-statuses": "tworzyć, zmieniać i usuwać twoje statusy",
+    "scopes.read-settings-followers": "przeglądać prośby o obserwowanie oraz obserwujących",
+    "scopes.write-exports": "tworzyć eksporty twoich danych",
+    "scopes.read-settings-profile": "przeglądać dane twojego profilu, np. adres email",
+    "scopes.write-followers": "akceptować prośby o obserwowanie oraz usuwać obserwujących",
+    "scopes.write-likes": "tworzyć i usuwać polubienia w twoim imieniu",
+    "scopes.write-blocks": "blokować oraz odblokowywać użytkowników, wyciszać oraz odciszać użytkowników",
+    "scopes.write-notifications": "oznaczać twoje powiadomienia jako odczytane oraz usuwać powiadomienia",
+    "scopes.write-event-suggestions": "sugerować wydarzenia w twoim imieniu",
+    "scopes.read-settings": "przeglądać twoje ustawienia, adres email, itp."
 }
