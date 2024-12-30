@@ -656,5 +656,17 @@
     "tag.title.trwl:travel_class": "Klasa",
     "tag.title.trwl:wagon": "Wagon",
     "tag.title.trwl:seat": "Miejsce",
-    "access-token-is-private": "Traktuj swój token dostępu jak hasło. Nigdy nie udostępniaj go osobom trzecim."
+    "access-token-is-private": "Traktuj swój token dostępu jak hasło. Nigdy nie udostępniaj go osobom trzecim.",
+    "welcome.stats.registered": "zarejestrowanych użytkowników",
+    "welcome.stats.distance": "przejechanych kilometrów",
+    "trip-info.destination": "Do",
+    "trip-info.origin": "Z",
+    "trip-info.user": "Użytkownik",
+    "trip-info.arrival": "Przyjazd",
+    "trip-info.departure": "Odjazd",
+    "trip-info.stopovers": "Stacje pośrednie",
+    "trip-info.stopover": "Stacja",
+    "trip-info.title": ":linename w dniu :date",
+    "trip-info.in-this-connection": "W tym połączeniu",
+    "welcome.stats.duration": "lat w podróży"
 }
