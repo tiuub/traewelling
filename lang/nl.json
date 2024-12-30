@@ -836,5 +836,6 @@
     "welcome.header.vehicles": "Per spoor, bus of boot.",
     "welcome.header.open-source": "Open source en gratis, voor altijd.",
     "events.disclaimer.extendedcheckin": "Je hebt een verlengde inchecktijd.",
-    "profile.follows-you": "Volgt je"
+    "profile.follows-you": "Volgt je",
+    "trip_creation.no-valid-times": "De stationstijden staan niet in de juiste chronologische volgorde."
 }
