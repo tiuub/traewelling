@@ -45,7 +45,7 @@ class CachedHafas extends Hafas implements DataProviderInterface
         $when       = clone $when;
         $when->subMinutes(2);
         // set cache when minutes to 0, 15, 30 or 45
-        $when->minute = floor($when->minute / 15) * 15;
+        $when->minute = (int) (floor($when->minute / 15) * 15);
         $when->second = 0;
 
         // set duration longer than 15 minutes
