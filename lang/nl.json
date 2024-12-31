@@ -837,5 +837,14 @@
     "welcome.header.open-source": "Open source en gratis, voor altijd.",
     "events.disclaimer.extendedcheckin": "Je hebt een verlengde inchecktijd.",
     "profile.follows-you": "Volgt je",
-    "trip_creation.no-valid-times": "De stationstijden staan niet in de juiste chronologische volgorde."
+    "trip_creation.no-valid-times": "De stationstijden staan niet in de juiste chronologische volgorde.",
+    "trip-info.title": ":linename op :date",
+    "trip-info.stopovers": "Overstappen",
+    "trip-info.stopover": "Overstap",
+    "trip-info.departure": "Vertrek",
+    "trip-info.arrival": "Aankomst",
+    "trip-info.in-this-connection": "Op deze verbinding",
+    "trip-info.user": "Gebruiker",
+    "trip-info.origin": "Beginpunt",
+    "trip-info.destination": "Eindpunt"
 }
