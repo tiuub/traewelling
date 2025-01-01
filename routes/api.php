@@ -112,11 +112,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
                 Route::post('/{userId}/follow', [FollowController::class, 'createFollow']);
                 Route::delete('/{userId}/follow', [FollowController::class, 'destroyFollow']);
             });
-            Route::group(['middleware' => ['scope:write-followers']], static function() {
-                Route::delete('removeFollower', [FollowController::class, 'removeFollower']);           // TODO remove after 2024-10
-                Route::delete('rejectFollowRequest', [FollowController::class, 'rejectFollowRequest']); // TODO remove after 2024-10
-                Route::put('approveFollowRequest', [FollowController::class, 'approveFollowRequest']);  // TODO remove after 2024-10
-            });
             Route::group(['middleware' => ['scope:write-blocks']], static function() {
                 Route::post('/{userId}/block', [UserController::class, 'createBlock']);
                 Route::delete('/{userId}/block', [UserController::class, 'destroyBlock']);
@@ -158,11 +153,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
                 Route::get('tokens', [TokenController::class, 'index']);                    //TODO: undocumented endpoint - document when stable
                 Route::delete('tokens', [TokenController::class, 'revokeAllTokens']);       //TODO: undocumented endpoint - document when stable
                 Route::delete('token', [TokenController::class, 'revokeToken']);            //TODO: undocumented endpoint - document when stable
-            });
-            Route::group(['middleware' => ['scope:read-settings-followers']], static function() {
-                Route::get('followers', [FollowController::class, 'getFollowers']);            // TODO remove after 2024-10
-                Route::get('follow-requests', [FollowController::class, 'getFollowRequests']); // TODO remove after 2024-10
-                Route::get('followings', [FollowController::class, 'getFollowings']);          // TODO remove after 2024-10
             });
         });
         Route::group(['prefix' => 'webhooks'], static function() {
@@ -216,7 +206,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
             Route::get('event/{slug}/details', [EventController::class, 'showDetails']);
             Route::get('event/{slug}/statuses', [EventController::class, 'statuses']);
             Route::get('events', [EventController::class, 'index']);
-            Route::get('activeEvents', [EventController::class, 'activeEvents']); //@deprecated: remove after 2024-08
             Route::get('user/{username}', [UserController::class, 'show']);
             Route::get('user/{username}/statuses', [UserController::class, 'statuses']);
         });
