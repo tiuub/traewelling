@@ -159,9 +159,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
                 Route::delete('tokens', [TokenController::class, 'revokeAllTokens']);       //TODO: undocumented endpoint - document when stable
                 Route::delete('token', [TokenController::class, 'revokeToken']);            //TODO: undocumented endpoint - document when stable
             });
-            Route::group(['middleware' => ['scope:read-settings-followers']], static function() {
-                Route::get('followings', [FollowController::class, 'getFollowings']);          // TODO remove after 2024-10
-            });
         });
         Route::group(['prefix' => 'webhooks'], static function() {
             Route::get('/', [WebhookController::class, 'getWebhooks']);
