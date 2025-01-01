@@ -365,18 +365,4 @@ class FollowController extends Controller
             return $this->sendError('Unknown error', 500);
         }
     }
-
-    // TODO remove after 2024-10
-    public function rejectFollowRequest(Request $request): JsonResponse {
-        $validated = $request->validate(['userId' => ['required',]]);
-        try {
-            FollowBackend::rejectFollower(auth()->user()->id, $validated['userId']);
-            return $this->sendResponse();
-        } catch (ModelNotFoundException) {
-            return $this->sendError('Request not found');
-        } catch (Exception) {
-            Log::error('APIv1/rejectFollowRequest: Could not reject follow request', ['user' => auth()->user(), 'userId' => $validated['userId']]);
-            return $this->sendError('Unknown error', 500);
-        }
-    }
 }
