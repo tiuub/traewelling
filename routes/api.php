@@ -113,7 +113,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
                 Route::delete('/{userId}/follow', [FollowController::class, 'destroyFollow']);
             });
             Route::group(['middleware' => ['scope:write-followers']], static function() {
-                Route::delete('removeFollower', [FollowController::class, 'removeFollower']);           // TODO remove after 2024-10
                 Route::delete('rejectFollowRequest', [FollowController::class, 'rejectFollowRequest']); // TODO remove after 2024-10
                 Route::put('approveFollowRequest', [FollowController::class, 'approveFollowRequest']);  // TODO remove after 2024-10
             });
