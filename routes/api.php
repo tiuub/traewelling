@@ -216,7 +216,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
             Route::get('event/{slug}/details', [EventController::class, 'showDetails']);
             Route::get('event/{slug}/statuses', [EventController::class, 'statuses']);
             Route::get('events', [EventController::class, 'index']);
-            Route::get('activeEvents', [EventController::class, 'activeEvents']); //@deprecated: remove after 2024-08
             Route::get('user/{username}', [UserController::class, 'show']);
             Route::get('user/{username}/statuses', [UserController::class, 'statuses']);
         });
