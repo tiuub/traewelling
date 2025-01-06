@@ -668,5 +668,8 @@
     "trip-info.stopover": "Stacja",
     "trip-info.title": ":linename w dniu :date",
     "trip-info.in-this-connection": "W tym połączeniu",
-    "welcome.stats.duration": "lat w podróży"
+    "welcome.stats.duration": "lat w podróży",
+    "profile.youre-blocked-information-text": "Zostałeś zablokowany przez użytkownika @:username, nie możesz zobaczyć jego meldunków.",
+    "settings.colorscheme.auto": "Ustawienia systemowe",
+    "dashboard.empty.teaser": "Możesz obserwować innych użytkowników, żeby zobaczyć tutaj ich meldunki."
 }
