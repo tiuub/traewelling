@@ -21,6 +21,8 @@ class WikidataImportService
         'Q124817561', // Betriebsstelle
         'Q644371', // internationaler Flughafen
         'Q21836433', // Flughafen
+        'Q1335652', // airport railway station
+        'Q63979268', // people mover station
         'Q953806', // Bushaltestelle
         'Q2175765', // Straßenbahnhaltestelle
         'Q44782', // Hafen
