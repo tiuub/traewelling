@@ -565,7 +565,7 @@
     "status.visibility.4.detail": "Widoczne tylko dla zalogowanych użytkowników",
     "settings.delete-webhook.success": "Webhooki zostały usunięte",
     "map-providers.open-railway-map": "Open Railway Map",
-    "scopes.read-statuses": "zobacz wszystkie statusy",
+    "scopes.read-statuses": "wyświetlać wszystkie twoje statusy",
     "settings.title-appdevelopment": "Rozwój aplikacji",
     "user.timezone": "Strefa czasowa",
     "generate-token": "Wygeneruj token",
