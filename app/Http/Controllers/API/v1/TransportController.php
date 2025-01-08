@@ -11,10 +11,12 @@ use App\Exceptions\Checkin\AlreadyCheckedInException;
 use App\Exceptions\CheckInCollisionException;
 use App\Exceptions\HafasException;
 use App\Exceptions\StationNotOnTripException;
+use App\Http\Controllers\Backend\Transport\BahnWebApiController;
 use App\Http\Controllers\Backend\Transport\StationController;
 use App\Http\Controllers\Backend\Transport\TrainCheckinController;
 use App\Http\Controllers\TransportController as TransportBackend;
 use App\Http\Resources\CheckinSuccessResource;
+use App\Http\Resources\DepartureResource;
 use App\Http\Resources\StationResource;
 use App\Http\Resources\TripResource;
 use App\Hydrators\CheckinRequestHydrator;
@@ -176,6 +178,20 @@ class TransportController extends Controller
                             ]
             );
         } catch (HafasException) {
+            return $this->sendResponse(
+                data:       DepartureResource::collection(BahnWebApiController::getDepartures($station)),
+                additional: [
+                                'meta' => [
+                                    'station' => StationDto::fromModel($station),
+                                    'times'   => [
+                                        'now'  => $timestamp,
+                                        'prev' => $timestamp->clone()->subMinutes(15),
+                                        'next' => $timestamp->clone()->addMinutes(15)
+                                    ],
+                                ]
+                            ]
+            );
+
             return $this->sendError(__('messages.exception.generalHafas', [], 'en'), 502);
         } catch (ModelNotFoundException) {
             return $this->sendError(__('controller.transport.no-station-found', [], 'en'));
