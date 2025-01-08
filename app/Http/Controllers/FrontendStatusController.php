@@ -20,9 +20,6 @@ use Illuminate\View\View;
 class FrontendStatusController extends Controller
 {
     public function getDashboard(): Renderable|RedirectResponse {
-
-        BahnWebApiController::searchStation('Karlsruhe Hbf');
-
         $statuses = DashboardController::getPrivateDashboard(auth()->user());
 
         return view('dashboard', [
