@@ -157,11 +157,18 @@ class Bahn extends Controller implements DataProviderInterface
             $when = clone $when;
 
             $when->tz($timezone);
-            $response = Http::get("https://www.bahn.de/web/api/reiseloesung/abfahrten", [
-                'ortExtId' => $station->ibnr,
-                'datum'    => $when->format('Y-m-d'),
-                'zeit'     => $when->format('H:i'),
-            ]);
+
+            $params = '?ortExtId=' . $station->ibnr . '&datum=' . $when->format('Y-m-d') . '&zeit=' . $when->format('H:i');
+
+            $filterCategory = ReiseloesungCategory::fromTravelType($type);
+            if (isset($filterCategory)) {
+                foreach($filterCategory as $category) {
+                    $params = $params . '&verkehrsmittel[]=' . $category->value;
+                }
+            }
+
+            $requestUrl = "https://www.bahn.de/web/api/reiseloesung/abfahrten" . $params;
+            $response = Http::get($requestUrl);
 
             if (!$response->ok()) {
                 CacheKey::increment(HCK::DEPARTURES_NOT_OK);
