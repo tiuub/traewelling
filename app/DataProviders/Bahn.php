@@ -2,6 +2,7 @@
 
 namespace App\DataProviders;
 
+use App\Dto\Coordinate;
 use App\Dto\Internal\BahnTrip;
 use App\Dto\Internal\Departure;
 use App\Enum\HafasTravelType;
@@ -15,9 +16,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\TransportController;
 use App\Hydrators\DepartureHydrator;
 use App\Models\HafasOperator;
+use App\Models\PolyLine;
 use App\Models\Station;
 use App\Models\Stopover;
 use App\Models\Trip;
+use App\Objects\LineSegment;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
@@ -274,7 +277,7 @@ class Bahn extends Controller implements DataProviderInterface
      * @throws HafasException|JsonException
      */
     public function fetchRawHafasTrip(string $tripId, string $lineName) {
-        return $this->fetchJourney($tripId);
+        return $this->fetchJourney($tripId, true);
     }
 
     /**
@@ -287,7 +290,7 @@ class Bahn extends Controller implements DataProviderInterface
     public function fetchHafasTrip(string $tripID, string $lineName): Trip {
         $timezone = "Europe/Berlin";
 
-        $rawJourney = $this->fetchJourney($tripID);
+        $rawJourney = $this->fetchJourney($tripID, true);
         if ($rawJourney === null) {
             // sorry
             throw new HafasException(__('messages.exception.generalHafas'));
@@ -321,22 +324,6 @@ class Bahn extends Controller implements DataProviderInterface
             $tripNumber = $matches[1];
         }
 
-        $journey = Trip::updateOrCreate([
-                                            'trip_id' => $tripID,
-                                        ], [
-                                            'category'       => $category,
-                                            'number'         => $tripNumber,
-                                            'linename'       => $tripLineName,
-                                            'journey_number' => $tripNumber,
-                                            'operator_id'    => null, //TODO
-                                            'origin_id'      => $originStation->id,
-                                            'destination_id' => $destinationStation->id,
-                                            'polyline_id'    => null,
-                                            'departure'      => $departure,
-                                            'arrival'        => $arrival,
-                                            'source'         => TripSource::BAHN_WEB_API,
-                                        ]);
-
         $stopovers = collect();
         foreach ($rawJourney['halte'] as $rawHalt) {
             $station = $stopoverCacheFromDB->where('ibnr', $rawHalt['extId'])->first() ?? self::getStationFromHalt($rawHalt);
@@ -362,8 +349,88 @@ class Bahn extends Controller implements DataProviderInterface
                                      ]);
             $stopovers->push($stopover);
         }
+
+        $polyLine = isset($rawJourney['polylineGroup']) ? $this->getPolyLineFromTrip($rawJourney, $stopovers) : null;
+
+        $journey = Trip::updateOrCreate([
+                                            'trip_id' => $tripID,
+                                        ], [
+                                            'category'       => $category,
+                                            'number'         => $tripNumber,
+                                            'linename'       => $tripLineName,
+                                            'journey_number' => $tripNumber,
+                                            'operator_id'    => null, //TODO
+                                            'origin_id'      => $originStation->id,
+                                            'destination_id' => $destinationStation->id,
+                                            'polyline_id'    => $polyLine?->id,
+                                            'departure'      => $departure,
+                                            'arrival'        => $arrival,
+                                            'source'         => TripSource::BAHN_WEB_API,
+                                        ]);
         $journey->stopovers()->saveMany($stopovers);
 
         return $journey;
+    }
+
+    private function getPolyLineFromTrip($journey, Collection $stopovers): PolyLine {
+        $polyLine = $journey['polylineGroup'];
+        $features = [];
+        foreach($polyLine['polylineDescriptions'] as $description) {
+            foreach ($description['coordinates'] as $coordinate) {
+                $feature = [
+                    'type' => 'Feature',
+                    'geometry' => [
+                        'type' => 'Point',
+                        'coordinates' => [
+                            $coordinate['lng'],
+                            $coordinate['lat']
+                        ]
+                    ],
+                    'properties' => new \stdclass()
+                ];
+                $features[] = $feature;
+            }
+        }
+        $geoJson = ['type' => 'FeatureCollection', 'features' => $features];
+
+        // TODO DUPLICATED FROM BROUTERCONTROLLER
+        $highestMappedKey = null;
+        foreach ($stopovers as $stopover) {
+            $properties = [
+                'id'   => $stopover->station->ibnr,
+                'name' => $stopover->station->name,
+            ];
+
+            //Get feature with the lowest distance to station
+            $minDistance       = null;
+            $closestFeatureKey = null;
+            foreach ($geoJson['features'] as $key => $feature) {
+                if (($highestMappedKey !== null && $key <= $highestMappedKey) || !isset($feature['geometry']['coordinates'])) {
+                    //Don't look again at the same stations.
+                    //This is required and very important to prevent bugs for ring lines!
+                    continue;
+                }
+                $distance = (new LineSegment(
+                    new Coordinate($feature['geometry']['coordinates'][1], $feature['geometry']['coordinates'][0]),
+                    new Coordinate($stopover->station->latitude, $stopover->station->longitude)
+                ))->calculateDistance();
+
+                if ($minDistance === null || $distance < $minDistance) {
+                    $minDistance       = $distance;
+                    $closestFeatureKey = $key;
+                }
+            }
+            $highestMappedKey                                      = $closestFeatureKey;
+            $geoJson['features'][$closestFeatureKey]['properties'] = $properties;
+        }
+
+        $geoJsonString = json_encode($geoJson);
+        $polyline = PolyLine::create([
+                                        'hash' =>       md5($geoJsonString),
+                                        'polyline' =>   $geoJsonString,
+                                        'source' =>     'hafas', // maybe add a new one?
+                                        'parent_id' =>  null
+                                     ]);
+        return $polyline;
     }
 }
