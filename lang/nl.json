@@ -842,5 +842,6 @@
     "trip-info.in-this-connection": "Op deze verbinding",
     "trip-info.user": "Gebruiker",
     "trip-info.origin": "Beginpunt",
-    "trip-info.destination": "Eindpunt"
+    "trip-info.destination": "Eindpunt",
+    "requested-timestamp": "Verzocht tijdstip"
 }
