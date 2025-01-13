@@ -119,7 +119,7 @@ class Bahn extends Controller implements DataProviderInterface
         //urgh, there is no lat/lon - extract it from id
         // example id: A=1@O=Druseltal, Kassel@X=9414484@Y=51301106@U=81@L=714800@
         $matches = [];
-        preg_match('/@X=(\d+)@Y=(\d+)/', $rawHalt['id'], $matches);
+        preg_match('/@X=(-?\d+)@Y=(-?\d+)/', $rawHalt['id'], $matches);
         $latitude  = $matches[2] / 1000000;
         $longitude = $matches[1] / 1000000;
 
@@ -205,17 +205,21 @@ class Bahn extends Controller implements DataProviderInterface
                     $departureStation = $station;
                 }
 
+                preg_match('/#ZE#(\d+)/', $journeyId, $matches);
+                $journeyNumber = 0;
+                if (count($matches) > 1) {
+                    $journeyNumber = $matches[1];
+
+                    if (empty($tripLineName)) {
+                        $tripLineName = $matches[1];
+                    }
+                }
+
                 // Cache data used for trip creation since another endpoints do not provide them
                 Cache::add($journeyId, [
                     'category' => $hafasTravelType,
                     'lineName' => $tripLineName
                 ],         now()->addMinutes(30));
-
-                preg_match('/#ZE#(\d+)/', $journeyId, $matches);
-                $journeyNumber = 0;
-                if (count($matches) > 1) {
-                    $journeyNumber = $matches[1];
-                }
 
                 $departure = new Departure(
                     station:          $departureStation,
