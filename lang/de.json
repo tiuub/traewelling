@@ -829,5 +829,6 @@
   "trip-info.destination": "Zielort",
   "requested-timestamp": "Abfragezeitpunkt",
   "status.locked-visibility": "Du kannst die Sichtbarkeit dieses Status nicht ändern.",
-  "status.hidden-body": "Der Statustext ist für andere User nicht sichtbar."
+  "status.hidden-body": "Der Statustext ist für andere User nicht sichtbar.",
+  "successfully-deleted": "Erfolgreich gelöscht"
 }
