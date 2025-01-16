@@ -828,5 +828,7 @@
   "trip-info.user": "User",
   "trip-info.origin": "Origin",
   "trip-info.destination": "Destination",
-  "requested-timestamp": "Requested timestamp"
+  "requested-timestamp": "Requested timestamp",
+  "status.locked-visibility": "You cannot change the visibility of this status.",
+  "status.hidden-body": "The status text is not visible to other users."
 }
