@@ -518,7 +518,7 @@
     "menu.oauth_authorize.request_title": "Prośba o autoryzację",
     "menu.oauth_authorize.application_information.author": ":application stworzona przez <a href=\":url\">:user</a>",
     "menu.oauth_authorize.application_information.created_at": "Utworzono :time",
-    "menu.oauth_authorize.application_information.user_count": ":count Użytkownik | :count Użytkownicy",
+    "menu.oauth_authorize.application_information.user_count": ":count Użytkownik | :count Użytkowników | :count Użytkowników",
     "menu.oauth_authorize.application_information.privacy_policy": "Polityka prywatności :client",
     "profile.youre-blocking-text": "Zablokowano @:username.",
     "christmas-mode.enable": "Włączono świąteczny tryb dla tej sesji",
