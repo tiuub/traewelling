@@ -271,20 +271,4 @@ class EventController extends Controller
         }
         return $this->sendError(error: __('messages.exception.general'), code: 500);
     }
-
-    /**
-     * @OA\Get(
-     *      path="/activeEvents",
-     *      operationId="getActiveEvents",
-     *      tags={"Events"},
-     *      summary="DEPRECATED - USE /events - removed after 2024-08",
-     *      description="DEPRECATED - USE /events - removed after 2024-08",
-     *      @OA\Response(response=200, description="The events"),
-     * )
-     * @return AnonymousResourceCollection
-     * @deprecated Use /events instead - removed after 2024-08
-     */
-    public function activeEvents(): AnonymousResourceCollection {
-        return EventResource::collection(Event::forTimestamp(now())->get());
-    }
 }

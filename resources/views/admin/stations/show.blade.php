@@ -1,5 +1,8 @@
 @php use App\Enum\Wikidata\Property; @endphp
 @extends('admin.layout')
+@php
+    /** @var \App\Models\Station $station */
+@endphp
 
 @section('title', 'Station - ' . $station->name)
 
@@ -17,6 +20,28 @@
                         <tr>
                             <th>Name</th>
                             <td>{{ $station->name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Timezone offset</th>
+                            <td>
+                                {{ $station->time_offset ?? 'null' }}
+                                <a class="float-end btn btn-sm btn-outline-primary"
+                                   onclick="resetTimeOffset({{$station->id}})"
+                                >
+                                    Reset Time Offset
+                                </a>
+                                <script>
+                                    function resetTimeOffset(stationId) {
+                                        fetch('/api/v1/stations/' + stationId, {
+                                            method: 'PUT',
+                                            body: JSON.stringify({time_offset: null}),
+                                            headers: {'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content}
+                                        }).then(function () {
+                                            location.reload();
+                                        })
+                                    }
+                                </script>
+                            </td>
                         </tr>
                         <tr>
                             <th>Wikidata ID</th>
