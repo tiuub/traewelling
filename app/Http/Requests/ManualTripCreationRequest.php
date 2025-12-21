@@ -28,6 +28,7 @@ class ManualTripCreationRequest extends FormRequest
             'destinationId'             => ['required', 'exists:train_stations,id'],
             'destinationArrivalPlanned' => ['required', 'date'],
             'destinationArrivalReal'    => ['nullable', 'date'],
+            'polyline'                  => ['nullable', 'json'],
             'stopovers.*.stationId'     => ['required', 'exists:train_stations,id'],
             'stopovers.*.arrival'       => ['required_without:stopovers.*.departure', 'required_with:stopovers.*.arrivalReal', 'date'],
             'stopovers.*.arrivalReal'   => ['nullable', 'date'],
