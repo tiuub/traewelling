@@ -20,3 +20,4 @@ avatars/
 database-data/
 .devenv
 .direnv
+storage/polylines/**

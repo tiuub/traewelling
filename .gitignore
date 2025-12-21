@@ -54,3 +54,6 @@ lang/php_*.json
 *.sqlite
 /storage/operator-mapping.csv
 /storage/operator-operators.csv
+
+.devcontainer/
+docker-compose.yml
