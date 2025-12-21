@@ -13,12 +13,15 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN apt update && \
     apt upgrade -y && \
-    apt install -y zlib1g-dev libpng-dev libsodium-dev wait-for-it default-mysql-client && \
+    apt install -y git zlib1g-dev libpng-dev libsodium-dev wait-for-it default-mysql-client && \
     docker-php-ext-install gd exif pdo pdo_mysql sodium && \
     a2enmod rewrite && \
     a2enmod http2 && \
     sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf && \
     sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+RUN mkdir -p /etc/mysql/conf.d && \
+    printf "[client]\nssl=0\n" > /etc/mysql/conf.d/disable-ssl.cnf
 
 COPY --from=composer-build --chown=www-data:www-data /usr/src/trwl /var/www/html
 COPY docs/hosting/docker/docker-entrypoint.sh /var/www/html/docker-entrypoint.sh
