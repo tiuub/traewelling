@@ -8,6 +8,7 @@ use App\Enum\HafasTravelType;
 use App\Enum\TripSource;
 use App\Exceptions\ManualTripValidationException;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\TransportController;
 use App\Models\Operator;
 use App\Models\Station;
 use App\Models\Stopover;
@@ -30,6 +31,7 @@ class ManualTripCreator extends Controller
     private Station         $destination;
     private Carbon          $destinationArrivalPlanned;
     private ?Carbon         $destinationArrivalReal;
+    private ?string         $polyline = null;
     private array           $stopovers = [];
 
     /**
@@ -58,7 +60,14 @@ class ManualTripCreator extends Controller
             'destination_id' => $this->destination->id,
             'departure'      => $this->originDeparturePlanned,
             'arrival'        => $this->destinationArrivalPlanned,
+            'polyline_set'   => $this->polyline !== null,
         ]);
+
+        $polylineId = null;
+        if ($this->polyline !== null) {
+            $polyline   = TransportController::getPolylineHash($this->polyline, TripSource::USER->value);
+            $polylineId = $polyline->id;
+        }
         $this->trip = Trip::create([
                                        'trip_id'        => $this->generateUniqueTripId(),
                                        'category'       => $this->category,
@@ -70,6 +79,7 @@ class ManualTripCreator extends Controller
                                        'destination_id' => $this->destination->id,
                                        'departure'      => $this->originDeparturePlanned,
                                        'arrival'        => $this->destinationArrivalPlanned,
+                                       'polyline_id'    => $polylineId,
                                        'source'         => TripSource::USER,
                                        'user_id'        => auth()->user()?->id ?? null,
                                    ]);
@@ -156,6 +166,11 @@ class ManualTripCreator extends Controller
         $this->destination               = $destination;
         $this->destinationArrivalPlanned = $plannedArrival;
         $this->destinationArrivalReal    = $realArrival;
+        return $this;
+    }
+
+    public function setPolyline(?string $polyline): ManualTripCreator {
+        $this->polyline = $polyline;
         return $this;
     }
 
