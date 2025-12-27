@@ -26,7 +26,21 @@ else
     cd /var/www/html
     runuser -u www-data -- php artisan optimize
 
-    if [ "$role" = "app" ]; then
+    if [ "$role" = "dev" ]; then
+
+        echo "Running as dev..."
+
+        if [ "${SEED_DB}" = "true" ]; then
+            echo "Resetting OAuth keys and seeding database"
+            runuser -u www-data -- php artisan migrate:fresh --seed --force
+            runuser -u www-data -- php artisan passport:install --force --quiet --no-interaction
+        else
+            runuser -u www-data -- php artisan migrate --force
+        fi
+
+        runuser -u www-data -- php artisan storage:link || true
+
+    elif [ "$role" = "app" ]; then
 
         echo "Running as app..."
 
