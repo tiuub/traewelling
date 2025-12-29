@@ -7,6 +7,7 @@ use App\Enum\HafasTravelType;
 use App\Enum\TripSource;
 use App\Http\Controllers\Backend\Transport\ManualTripCreator;
 use App\Http\Controllers\Backend\Transport\TrainCheckinController;
+use App\Http\Controllers\TransportController;
 use App\Models\Operator;
 use App\Models\Station;
 use App\Models\User;
@@ -26,12 +27,31 @@ class ManualTripCreatorTest extends FeatureTestCase
         $departure                = Carbon::now()->addMinutes(5)->setSecond(0)->setMicrosecond(0);
         $stopoverArrivalDeparture = Carbon::now()->addMinutes(10)->setSecond(0)->setMicrosecond(0);
         $arrival                  = Carbon::now()->addMinutes(15)->setSecond(0)->setMicrosecond(0);
+        $polyline                 = json_encode([
+            'type'     => 'FeatureCollection',
+            'features' => [
+                [
+                    'type'       => 'Feature',
+                    'geometry'   => [
+                        'type'        => 'LineString',
+                        'coordinates' => [
+                            [$originStation->longitude, $originStation->latitude],
+                            [$stopoverStation->longitude, $stopoverStation->latitude],
+                            [$destinationStation->longitude, $destinationStation->latitude],
+                        ],
+                    ],
+                    'properties' => new \stdClass(),
+                ],
+            ],
+        ]);
+        $polylineModel = TransportController::getPolylineHash($polyline, TripSource::USER->value);
 
         $creator = new ManualTripCreator();
 
         $creator->setCategory(HafasTravelType::REGIONAL)
                 ->setLine('S1', 85001)
                 ->setOperator(Operator::factory()->create())
+                ->setPolylineId($polylineModel->id)
                 ->addStopover(
                     station:          $stopoverStation,
                     plannedDeparture: $stopoverArrivalDeparture,
@@ -46,6 +66,11 @@ class ManualTripCreatorTest extends FeatureTestCase
         $trip->refresh();
 
         $this->assertEquals(TripSource::USER, $trip->source);
+        $this->assertNotNull($trip->polyline_id);
+        $this->assertDatabaseHas('poly_lines', [
+            'id'   => $trip->polyline_id,
+            'hash' => md5($polyline),
+        ]);
 
         $this->assertDatabaseHas('hafas_trips', [
             'trip_id'        => $trip->trip_id,
