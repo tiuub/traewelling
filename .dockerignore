@@ -21,3 +21,7 @@ database-data/
 .devenv
 .direnv
 storage/polylines/**
+storage/logs/**
+storage/framework/cache/**
+storage/framework/sessions/**
+storage/framework/views/**
