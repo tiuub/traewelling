@@ -10,6 +10,7 @@ use App\Http\Controllers\Backend\Transport\ManualTripCreator;
 use App\Http\Requests\ManualTripCreationRequest;
 use App\Http\Resources\TripResource;
 use App\Models\Operator;
+use App\Models\PolyLine;
 use App\Models\Station;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -45,6 +46,11 @@ class TripController extends Controller
             if (isset($validated['operatorId'])) {
                 $operator = Operator::findOrFail($validated['operatorId']);
                 $creator->setOperator($operator);
+            }
+
+            if (isset($validated['polylineId'])) {
+                $polyline = PolyLine::findOrFail($validated['polylineId']);
+                $creator->setPolyline($polyline);
             }
 
             foreach ($validated['stopovers'] ?? [] as $stopover) {

@@ -9,6 +9,7 @@ use App\Enum\TripSource;
 use App\Exceptions\ManualTripValidationException;
 use App\Http\Controllers\Controller;
 use App\Models\Operator;
+use App\Models\PolyLine;
 use App\Models\Station;
 use App\Models\Stopover;
 use App\Models\Trip;
@@ -24,6 +25,7 @@ class ManualTripCreator extends Controller
     private string          $lineName;
     private ?int            $journeyNumber;
     private ?Operator       $operator  = null;
+    private ?PolyLine       $polyline  = null;
     private Station         $origin;
     private Carbon          $originDeparturePlanned;
     private ?Carbon         $originDepartureReal;
@@ -68,6 +70,7 @@ class ManualTripCreator extends Controller
                                        'operator_id'    => $this->operator->id ?? null,
                                        'origin_id'      => $this->origin->id,
                                        'destination_id' => $this->destination->id,
+                                       'polyline_id'    => $this->polyline?->id,
                                        'departure'      => $this->originDeparturePlanned,
                                        'arrival'        => $this->destinationArrivalPlanned,
                                        'source'         => TripSource::USER,
@@ -142,6 +145,11 @@ class ManualTripCreator extends Controller
 
     public function setOperator(?Operator $operator): ManualTripCreator {
         $this->operator = $operator;
+        return $this;
+    }
+
+    public function setPolyline(?PolyLine $polyline): ManualTripCreator {
+        $this->polyline = $polyline;
         return $this;
     }
 
