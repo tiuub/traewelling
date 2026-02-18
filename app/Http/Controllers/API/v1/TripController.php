@@ -30,8 +30,10 @@ class TripController extends Controller
 
         try {
             $creator = new ManualTripCreator();
+            $polylineId = $validated['polylineId'] ?? null;
             $creator->setCategory(HafasTravelType::from($validated['category']))
                     ->setLine($validated['lineName'], $validated['journeyNumber'])
+                    ->setPolylineId($polylineId)
                     ->setOrigin(
                         Station::findOrFail($validated['originId']),
                         Carbon::parse($validated['originDeparturePlanned']),

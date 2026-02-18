@@ -32,6 +32,7 @@ class ManualTripCreator extends Controller
     private Station         $destination;
     private Carbon          $destinationArrivalPlanned;
     private ?Carbon         $destinationArrivalReal;
+    private ?int            $polylineId = null;
     private array           $stopovers = [];
 
     /**
@@ -60,7 +61,9 @@ class ManualTripCreator extends Controller
             'destination_id' => $this->destination->id,
             'departure'      => $this->originDeparturePlanned,
             'arrival'        => $this->destinationArrivalPlanned,
+            'polyline_set'   => $this->polylineId !== null,
         ]);
+
         $this->trip = Trip::create([
                                        'trip_id'        => $this->generateUniqueTripId(),
                                        'category'       => $this->category,
@@ -73,6 +76,7 @@ class ManualTripCreator extends Controller
                                        'polyline_id'    => $this->polyline?->id,
                                        'departure'      => $this->originDeparturePlanned,
                                        'arrival'        => $this->destinationArrivalPlanned,
+                                       'polyline_id'    => $this->polylineId,
                                        'source'         => TripSource::USER,
                                        'user_id'        => auth()->user()?->id ?? null,
                                    ]);
@@ -164,6 +168,11 @@ class ManualTripCreator extends Controller
         $this->destination               = $destination;
         $this->destinationArrivalPlanned = $plannedArrival;
         $this->destinationArrivalReal    = $realArrival;
+        return $this;
+    }
+
+    public function setPolylineId(?int $polylineId): ManualTripCreator {
+        $this->polylineId = $polylineId;
         return $this;
     }
 
