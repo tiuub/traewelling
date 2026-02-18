@@ -29,6 +29,7 @@ use App\Http\Controllers\API\v1\StationController;
 use App\Http\Controllers\API\v1\StatisticsController;
 use App\Http\Controllers\API\v1\StatusController;
 use App\Http\Controllers\API\v1\StatusTagController;
+use App\Http\Controllers\API\v1\PolylineController;
 use App\Http\Controllers\API\v1\TokenController;
 use App\Http\Controllers\API\v1\TransportController;
 use App\Http\Controllers\API\v1\TripController;
@@ -67,6 +68,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['return-json']], static functio
             Route::post('status/{statusId}/tags', [StatusTagController::class, 'store']);
             Route::put('status/{statusId}/tags/{tagKey}', [StatusTagController::class, 'update']);
             Route::delete('status/{statusId}/tags/{tagKey}', [StatusTagController::class, 'destroy']);
+            Route::post('polyline/manual', [PolylineController::class, 'storeManual']);
         });
         Route::group(['middleware' => ['scope:write-likes']], static function() {
             Route::post('status/{id}/like', [LikesController::class, 'create']);
